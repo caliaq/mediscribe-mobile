@@ -1,6 +1,7 @@
 import { Stack } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
+import { Ionicons } from 'react-native-vector-icons';  // Importujeme Ionicons pro šipku
 
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Colors } from '@/constants/Colors';
@@ -12,7 +13,6 @@ export default function StackLayout() {
   return (
     <Stack
       screenOptions={{
-        headerShown: false,  // Skrytí hlavičky na všech obrazovkách
         headerTintColor: Colors[colorScheme ?? 'light'].tint,
         headerStyle: Platform.select({
           ios: {
@@ -23,24 +23,25 @@ export default function StackLayout() {
       }}>
       <Stack.Screen
         name="index"
-        
         options={{
-          title: 'home',
-          headerTitleAlign: 'center',
-          headerLeft: () => (
-            <IconSymbol size={32} name="house.fill" color={Colors[colorScheme ?? 'light'].tint} />
-          ),
+          headerShown: false,  // Skrýt header na obrazovce "index"
         }}
       />
       <Stack.Screen
         name="recording/[id]"
-        options={{
-          title: 'recording',
+        options={({ navigation }) => ({
+          title: 'Detaily',
           headerTitleAlign: 'center',
           headerLeft: () => (
-            <IconSymbol size={32} name="paperplane.fill" color={Colors[colorScheme ?? 'light'].tint} />
+            <Ionicons 
+              name="arrow-back"  // Ikona šipky zpět
+              size={24} 
+              color={Colors[colorScheme ?? 'light'].tint}  // Barva ikony dle tématu
+              onPress={() => navigation.goBack()} 
+              style={{ paddingLeft: 10 }}  // Padding pro lepší rozložení
+            />
           ),
-        }}
+        })} 
       />
     </Stack>
   );
