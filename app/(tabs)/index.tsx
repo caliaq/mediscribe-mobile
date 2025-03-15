@@ -2,7 +2,7 @@ import { Image, StyleSheet, View, FlatList, Text } from 'react-native';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { Card } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Constants } from 'expo-constants';
+import { API_URL, BACKGROUND_COLOR, CARD_COLOR, TEXT_COLOR, BLUE_COLOR, MAGENTA_COLOR } from '../constats';
 
 const DATA = [
   { id: '1', name: 'Alena Malá', age: 69, location: 'Plzeň Americká, pod mostem 5', gender: 'female' },
@@ -20,8 +20,8 @@ const CardItem = ({ name, age, location, gender }) => (
     <Card.Content style={styles.cardContent}>
       <MaterialCommunityIcons
         name={gender === 'female' ? 'human-female' : 'human-male'}
-        size={24}
-        color={gender === 'female' ? '#ff007f' : '#4a90e2'}
+        size={32}
+        color={gender === 'female' ? MAGENTA_COLOR : BLUE_COLOR}
         style={styles.icon}
       />
       <View>
@@ -51,38 +51,38 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0D1218',
+    backgroundColor: BACKGROUND_COLOR,
     padding: 16,
   },
   header: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#0D1218'
+    backgroundColor: BACKGROUND_COLOR
   },
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 5,
-    padding: 10,
-    borderRadius: 10,
-    backgroundColor: '#1E1E1E',
+    marginVertical: 4,
+    padding: 16,
+    borderRadius: 16,
+    backgroundColor: BACKGROUND_COLOR,
     borderWidth: 2,
   },
   femaleBorder: {
-    borderColor: '#ff007f',
+    borderColor: MAGENTA_COLOR,
   },
   maleBorder: {
-    borderColor: '#4a90e2',
+    borderColor: BLUE_COLOR,
   },
   cardContent: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   icon: {
-    marginRight: 10,
+    marginRight: 16,
   },
   name: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: 'bold',
     color: 'white',
   },
@@ -91,9 +91,9 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   logo: {
-    height: 50,
+    height: 48,
     resizeMode: 'contain',
-    marginBottom: 10,
-    marginTop: 48,
+    marginBottom: 8,
+    marginTop: 64,
   },
 });
