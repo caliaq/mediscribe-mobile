@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { View, TextInput, Button, StyleSheet, Alert, ActivityIndicator, Text } from 'react-native';
 import { router } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
 import { BACKGROUND_COLOR, TEXT_COLOR, API_URL } from './constats';
@@ -13,7 +13,7 @@ export default function Login() {
   const handleLogin = async () => {
     // Input validation
     if (!username.trim() || !password.trim()) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert('Error', 'Vyplňte uživatelské jméno a heslo');
       return;
     }
 
@@ -40,15 +40,15 @@ export default function Login() {
         router.replace('/(tabs)');
       } else {
         Alert.alert(
-          'Login Failed', 
-          data.message || 'Invalid credentials'
+          'Error', 
+          data.message || 'Neplatné přihlašovací údaje'
         );
       }
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error('Error:', error);
       Alert.alert(
         'Error', 
-        'Connection failed. Please check your internet connection.'
+        'Nemáte připojení k internetu nebo server je nedostupný'
       );
     } finally {
       setIsLoading(false);
@@ -57,9 +57,10 @@ export default function Login() {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.header}>Přihlášení</Text>
       <TextInput
         style={styles.input}
-        placeholder="Username"
+        placeholder="uživatelské jméno"
         placeholderTextColor={TEXT_COLOR}
         value={username}
         onChangeText={setUsername}
@@ -68,7 +69,7 @@ export default function Login() {
       />
       <TextInput
         style={styles.input}
-        placeholder="Password"
+        placeholder="heslo"
         placeholderTextColor={TEXT_COLOR}
         value={password}
         onChangeText={setPassword}
@@ -78,7 +79,7 @@ export default function Login() {
       {isLoading ? (
         <ActivityIndicator size="large" color={TEXT_COLOR} />
       ) : (
-        <Button title="Login" onPress={handleLogin} />
+        <Button title="přihlásit se"  onPress={handleLogin} />
       )}
     </View>
   );
@@ -99,5 +100,14 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 4,
     color: TEXT_COLOR,
+    fontFamily: 'Outfit',
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: TEXT_COLOR,
+    marginBottom: 24,
+    fontFamily: 'Outfit',
+    textAlign: 'center',
   },
 });

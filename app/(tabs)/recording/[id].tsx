@@ -7,6 +7,7 @@ import { API_URL, BACKGROUND_COLOR, TEXT_COLOR } from '../../constats';
 import * as Haptics from 'expo-haptics';
 import * as FileSystem from 'expo-file-system';
 import { useLocalSearchParams } from 'expo-router';
+import { fetchWithAuth } from '../../../middleware/authMiddleware';
 
 export default function HomeScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -22,7 +23,7 @@ export default function HomeScreen() {
     if (id) {
       console.log('Fetching patient data for ID:', id);
       setIsLoading(true); // Zapneme loading indikátor při načítání pacienta
-      fetch(`${API_URL}patients/${id}`)
+      fetchWithAuth(`${API_URL}patients/${id}`)
         .then((response) => response.json())
         .then((data) => {
           console.log('Patient data received:', data);
@@ -98,7 +99,7 @@ export default function HomeScreen() {
         setIsLoading(true); // Zapneme loading indikátor při nahrávání
         const base64Audio = await FileSystem.readAsStringAsync(recordingUri, { encoding: FileSystem.EncodingType.Base64 });
 
-        const response = await fetch(API_URL + "recordings", {
+        const response = await fetchWithAuth(API_URL + "recordings", {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
