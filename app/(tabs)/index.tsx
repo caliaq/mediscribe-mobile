@@ -1,38 +1,75 @@
 import { Image, StyleSheet, View, FlatList, Text } from 'react-native';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
+import React, { useEffect, useState } from 'react';
 import { Card } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { API_URL, BACKGROUND_COLOR, CARD_COLOR, TEXT_COLOR, BLUE_COLOR, MAGENTA_COLOR } from '../constats';
 
-const DATA = [
-  { id: '1', name: 'Alena Malá', age: 69, location: 'Plzeň Americká, pod mostem 5', gender: 'female' },
-  { id: '2', name: 'Pepa Novák', age: 134, location: 'Plzeň Americká, pod mostem 1', gender: 'male' },
-  { id: '3', name: 'Alena Malá', age: 69, location: 'Plzeň Americká, pod mostem 5', gender: 'female' },
-  { id: '4', name: 'Pepa Novák', age: 134, location: 'Plzeň Americká, pod mostem 1', gender: 'male' },
-  { id: '5', name: 'Alena Malá', age: 69, location: 'Plzeň Americká, pod mostem 5', gender: 'female' },
-  { id: '6', name: 'Pepa Novák', age: 134, location: 'Plzeň Americká, pod mostem 1', gender: 'male' },
-  { id: '7', name: 'Pepa Novák', age: 134, location: 'Plzeň Americká, pod mostem 1', gender: 'male' },
-  { id: '8', name: 'Pepa Novák', age: 134, location: 'Plzeň Americká, pod mostem 1', gender: 'male' },
-];
+// Define TypeScript interfaces for data
+interface Address {
+  street: string;
+  city: string;
+  zip: string;
+}
 
-const CardItem = ({ name, age, location, gender }) => (
-  <Card style={[styles.card, gender === 'female' ? styles.femaleBorder : styles.maleBorder]}>
-    <Card.Content style={styles.cardContent}>
-      <MaterialCommunityIcons
-        name={gender === 'female' ? 'human-female' : 'human-male'}
-        size={32}
-        color={gender === 'female' ? MAGENTA_COLOR : BLUE_COLOR}
-        style={styles.icon}
-      />
-      <View>
-        <Text style={styles.name}>{name}, {age}</Text>
-        <Text style={styles.location}>{location}</Text>
-      </View>
-    </Card.Content>
-  </Card>
-);
+interface Name {
+  first: string;
+  last: string;
+}
 
-export default function HomeScreen() {
+interface Patient {
+  _id: string;
+  name: Name;
+  address: Address;
+  birthDate: string
+  sex: 'M' | 'F';
+}
+
+interface CardItemProps {
+  name: Name;
+  address: Address;
+  birthDate: string;
+  sex: 'M' | 'F';
+}
+
+const CardItem: React.FC<CardItemProps> = ({ name, address, birthDate, sex }) => {
+  const fullName = `${name.first} ${name.last}`;
+  const age = new Date().getFullYear() - new Date(birthDate).getFullYear();
+  const location = `${address.street} ${address.city}, ${address.zip}`;
+
+  return (
+    <Card style={[styles.card, sex === 'F' ? styles.femaleBorder : styles.maleBorder]}>
+      <Card.Content style={styles.cardContent}>
+        <MaterialCommunityIcons
+          name={sex === 'F' ? 'human-female' : 'human-male'}
+          size={32}
+          color={sex === 'F' ? MAGENTA_COLOR : BLUE_COLOR}
+          style={styles.icon}
+        />
+        <View>
+          <Text style={styles.name}>{fullName}, {age}</Text>
+          <Text style={styles.location}>{location}</Text>
+        </View>
+      </Card.Content>
+    </Card>
+  );
+};
+
+const HomeScreen: React.FC = () => {
+  const [data, setData] = useState<Patient[]>([]);
+
+  useEffect(() => {
+    fetch(`${API_URL}patients`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.data) {
+          setData(data.data);
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching patients data:', error);
+      });
+  }, []);
+
   return (
     <View style={{ flex: 1 }}>
       <View style={styles.header}>
@@ -40,15 +77,16 @@ export default function HomeScreen() {
       </View>
       <View style={styles.container}>
         <FlatList
-          data={DATA}
-          keyExtractor={(item) => item.id}
+          data={data}
+          keyExtractor={(item) => item._id.toString()}
           renderItem={({ item }) => <CardItem {...item} />}
           showsVerticalScrollIndicator={false}
         />
       </View>
     </View>
   );
-}
+};
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -102,3 +140,5 @@ const styles = StyleSheet.create({
     marginTop: 64,
   },
 });
+
+export default HomeScreen;
