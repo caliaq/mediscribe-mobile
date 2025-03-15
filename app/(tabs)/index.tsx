@@ -1,74 +1,99 @@
-import { Image, StyleSheet, Platform } from 'react-native';
-
-import { HelloWave } from '@/components/HelloWave';
+import { Image, StyleSheet, View, FlatList, Text } from 'react-native';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { Card } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Constants } from 'expo-constants';
+
+const DATA = [
+  { id: '1', name: 'Alena Malá', age: 69, location: 'Plzeň Americká, pod mostem 5', gender: 'female' },
+  { id: '2', name: 'Pepa Novák', age: 134, location: 'Plzeň Americká, pod mostem 1', gender: 'male' },
+  { id: '3', name: 'Alena Malá', age: 69, location: 'Plzeň Americká, pod mostem 5', gender: 'female' },
+  { id: '4', name: 'Pepa Novák', age: 134, location: 'Plzeň Americká, pod mostem 1', gender: 'male' },
+  { id: '5', name: 'Alena Malá', age: 69, location: 'Plzeň Americká, pod mostem 5', gender: 'female' },
+  { id: '6', name: 'Pepa Novák', age: 134, location: 'Plzeň Americká, pod mostem 1', gender: 'male' },
+  { id: '7', name: 'Pepa Novák', age: 134, location: 'Plzeň Americká, pod mostem 1', gender: 'male' },
+  { id: '8', name: 'Pepa Novák', age: 134, location: 'Plzeň Americká, pod mostem 1', gender: 'male' },
+];
+
+const CardItem = ({ name, age, location, gender }) => (
+  <Card style={[styles.card, gender === 'female' ? styles.femaleBorder : styles.maleBorder]}>
+    <Card.Content style={styles.cardContent}>
+      <MaterialCommunityIcons
+        name={gender === 'female' ? 'human-female' : 'human-male'}
+        size={24}
+        color={gender === 'female' ? '#ff007f' : '#4a90e2'}
+        style={styles.icon}
+      />
+      <View>
+        <Text style={styles.name}>{name}, {age}</Text>
+        <Text style={styles.location}>{location}</Text>
+      </View>
+    </Card.Content>
+  </Card>
+);
 
 export default function HomeScreen() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+    <View style={{ flex: 1 }}>
+      <View style={styles.header}>
+        <Image source={require('@/assets/images/logo.png')} style={styles.logo} />
+      </View>
+      <View style={styles.container}>
+        <FlatList
+          data={DATA}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => <CardItem {...item} />}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      </View>
+    </View>
   );
 }
-
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+    backgroundColor: '#0D1218',
+    padding: 16,
+  },
+  header: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#0D1218'
+  },
+  card: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    marginVertical: 5,
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: '#1E1E1E',
+    borderWidth: 2,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  femaleBorder: {
+    borderColor: '#ff007f',
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  maleBorder: {
+    borderColor: '#4a90e2',
+  },
+  cardContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  icon: {
+    marginRight: 10,
+  },
+  name: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: 'white',
+  },
+  location: {
+    fontSize: 14,
+    color: 'white',
+  },
+  logo: {
+    height: 50,
+    resizeMode: 'contain',
+    marginBottom: 10,
+    marginTop: 48,
   },
 });
