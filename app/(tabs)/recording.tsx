@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Audio } from 'expo-av';
 import { View, Text, TouchableOpacity, Image, StyleSheet, Alert } from 'react-native';
 import Constants from 'expo-constants';
@@ -10,10 +10,12 @@ import * as FileSystem from 'expo-file-system';
 export default function HomeScreen() {
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [isRecording, setIsRecording] = useState(false);
+  const [recordingUri, setRecordingUri] = useState<string | null>(null);
 
   const haptic = () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
   const startRecording = async () => {
+    if (recordingUri) return;
     try {
       const { granted } = await Audio.requestPermissionsAsync();
       if (!granted) {
@@ -39,28 +41,30 @@ export default function HomeScreen() {
     setIsRecording(false);
     await recording.stopAndUnloadAsync();
     const uri = recording.getURI();
-    if (uri) {
-      await uploadAudio(uri);
-    }
     setRecording(null);
+    if (uri) {
+      setRecordingUri(uri);
+    }
   };
 
-  const uploadAudio = async (uri: string) => {
+  const uploadAudio = async () => {
+    if (!recordingUri) return;
     try {
-      const base64Audio = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 });
+      const base64Audio = await FileSystem.readAsStringAsync(recordingUri, { encoding: FileSystem.EncodingType.Base64 });
 
-      const response = await fetch(`${API_URL}recordings`, {
+      const response = await fetch(API_URL + "recordings", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           data: base64Audio,
-          patientId: '12345', // Tady může být dynamická hodnota
+          patientId: '12345',
           fileType: 'm4a',
         }),
       });
 
       const result = await response.json();
       console.log('Nahrávání úspěšné:', result);
+      setRecordingUri(null);
     } catch (error) {
       console.error('Nahrávání selhalo:', error);
     }
@@ -71,13 +75,27 @@ export default function HomeScreen() {
       <Image source={require('@/assets/images/logo.png')} style={styles.logo} />
       <Text style={styles.name}>Alena Malá, 69</Text>
       <Text style={styles.location}>Plzeň Americká, pod mostem 5</Text>
-      <TouchableOpacity style={styles.recordButton} onPress={() => {
-        haptic();
-        isRecording ? stopRecording() : startRecording();
-      }}>
+      <TouchableOpacity 
+        style={[styles.recordButton, recordingUri && styles.disabledButton]} 
+        onPress={() => {
+          haptic();
+          isRecording ? stopRecording() : startRecording();
+        }}
+        disabled={!!recordingUri}
+      >
         <MaterialCommunityIcons name={isRecording ? 'microphone-off' : 'microphone'} size={48} color='#0D1218' />
       </TouchableOpacity>
-      <Text style={styles.recordText}>{isRecording ? 'Nahrává se...' : 'Začít nahrávat'}</Text>
+      <Text style={styles.recordText}>{recordingUri ? 'Chcete odeslat??' : isRecording ? 'Nahrává se...' : 'Začít nahrávat'}</Text>
+      {recordingUri && (
+        <View style={styles.actionsContainer}>
+          <TouchableOpacity style={styles.actionButton} onPress={() => setRecordingUri(null)}>
+            <MaterialCommunityIcons name='close' size={40} color='red' />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionButton} onPress={uploadAudio}>
+            <MaterialCommunityIcons name='check' size={40} color='green' />
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }
@@ -113,8 +131,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  disabledButton: {
+    opacity: 0.5,
+  },
   recordText: {
     color: TEXT_COLOR,
     marginTop: 8,
+  },
+  actionsContainer: {
+    flexDirection: 'row',
+    marginTop: 20,
+  },
+  actionButton: {
+    marginHorizontal: 20,
+    padding: 10,
   },
 });
