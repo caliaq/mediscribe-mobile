@@ -3,7 +3,7 @@ import { Audio } from 'expo-av';
 import { View, Text, TouchableOpacity, Image, StyleSheet, Alert } from 'react-native';
 import Constants from 'expo-constants';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { API_URL, BACKGROUND_COLOR, TEXT_COLOR } from '../../constats'; // Opravený import
+import { API_URL, BACKGROUND_COLOR, TEXT_COLOR } from '../../constats';
 import * as Haptics from 'expo-haptics';
 import * as FileSystem from 'expo-file-system';
 import { useLocalSearchParams } from 'expo-router';
@@ -19,11 +19,11 @@ export default function HomeScreen() {
 
   useEffect(() => {
     if (id) {
-      console.log('Fetching patient data for ID:', id); // Debugging
+      console.log('Fetching patient data for ID:', id);
       fetch(`${API_URL}patients/${id}`)
         .then((response) => response.json())
         .then((data) => {
-          console.log('Patient data received:', data); // Debugging
+          console.log('Patient data received:', data);
           if (data.data) {
             setPatient(data.data);
           }
@@ -83,10 +83,17 @@ export default function HomeScreen() {
       });
 
       const result = await response.json();
-      console.log('Nahrávání úspěšné:', result);
-      setRecordingUri(null);
+      
+      if (result.success) {
+        console.log('Nahrávání úspěšné:', result);
+        setRecordingUri(null);
+      } else {
+        console.error('Nahrávání selhalo:', result.data.message);
+        Alert.alert('Chyba', result.data.message || 'Něco se pokazilo při nahrávání.');
+      }
     } catch (error) {
       console.error('Nahrávání selhalo:', error);
+      Alert.alert('Chyba', 'Došlo k chybě při nahrávání.');
     }
   };
 
@@ -125,7 +132,9 @@ export default function HomeScreen() {
         >
           <MaterialCommunityIcons name={isRecording ? 'microphone-off' : 'microphone'} size={48} color='#0D1218' />
         </TouchableOpacity>
-        <Text style={styles.recordText}>{recordingUri ? 'Chcete odeslat??' : isRecording ? 'Nahrává se...' : 'Začít nahrávat'}</Text>
+        <Text style={styles.recordText}>
+          {recordingUri ? 'Chcete odeslat?' : isRecording ? 'Nahrává se...' : 'Začít nahrávat'}
+        </Text>
         {recordingUri && (
           <View style={styles.actionsContainer}>
             <TouchableOpacity style={styles.actionButton} onPress={() => setRecordingUri(null)}>

@@ -16,7 +16,6 @@ export default function StackLayout() {
         headerTintColor: Colors[colorScheme ?? 'light'].tint,
         headerStyle: Platform.select({
           ios: {
-            // Customize for iOS if needed
           },
           default: {},
         }),
