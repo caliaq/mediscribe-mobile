@@ -1,13 +1,15 @@
 import { router } from 'expo-router';
 import { API_URL } from '../app/constats';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Create custom fetch middleware
 export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
     try {
+        const token = await AsyncStorage.getItem('authToken');
         const response = await fetch(url, {
             ...options,
             headers: {
                 ...options.headers,
+                'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
             },
         });

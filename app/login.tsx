@@ -35,8 +35,7 @@ export default function Login() {
 
       if (data.success && data.data) {
         // Ensure data is stringified before storage
-        const authData = JSON.stringify(data.data);
-        await login(authData);
+        await login(data.data.token);
         router.replace('/(tabs)');
       } else {
         Alert.alert(

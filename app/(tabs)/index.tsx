@@ -1,10 +1,13 @@
 import { Image, StyleSheet, View, FlatList, Text, Button } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { Card } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { API_URL, BACKGROUND_COLOR, BLUE_COLOR, MAGENTA_COLOR } from '../constats';
 import { Link } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { fetchWithAuth } from '../../middleware/authMiddleware';
+import { router } from 'expo-router';
 
 // Define TypeScript interfaces for data
 interface Address {
@@ -64,23 +67,35 @@ const HomeScreen: React.FC = () => {
   const { logout } = useAuth();
 
   useEffect(() => {
-    fetch(`${API_URL}patients`)
-      .then((response) => response.json())
-      .then((data) => {
+    const fetchData = async () => {
+      try {
+        const response = await fetchWithAuth(`${API_URL}patients`);
+        const data = await response.json();
         if (data.data) {
           setData(data.data);
         }
-      })
-      .catch((error) => {
+      } catch (error) {
         console.error('Error fetching patients data:', error);
-      });
+      }
+    };
+
+    fetchData();
   }, []);
 
   return (
     <View style={{ flex: 1 }}>
       <View style={styles.header}>
         <Image source={require('@/assets/images/logo.png')} style={styles.logo} />
-        <Button title="Odhlásit se" onPress={logout} />
+        <View style={styles.headerButtons}>
+          <MaterialIcons 
+            name="qr-code-scanner" 
+            size={24} 
+            color="white" 
+            style={styles.scannerIcon}
+            onPress={() => router.push('/scanner')}
+          />
+          <Button title="Odhlásit se" onPress={logout} />
+        </View>
       </View>
       <View style={styles.container}>
         <FlatList
@@ -104,6 +119,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: BACKGROUND_COLOR
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   card: {
     flexDirection: 'row',
@@ -145,6 +164,9 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     marginBottom: 8,
     marginTop: 64,
+  },
+  scannerIcon: {
+    marginRight: 16,
   },
 });
 
