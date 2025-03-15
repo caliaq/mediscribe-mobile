@@ -1,9 +1,10 @@
-import { Image, StyleSheet, View, FlatList, Text } from 'react-native';
+import { Image, StyleSheet, View, FlatList, Text, Button } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { Card } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { API_URL, BACKGROUND_COLOR, BLUE_COLOR, MAGENTA_COLOR } from '../constats';
 import { Link } from 'expo-router';
+import { useAuth } from '@/context/AuthContext';
 
 // Define TypeScript interfaces for data
 interface Address {
@@ -60,6 +61,7 @@ const CardItem: React.FC<CardItemProps> = ({ name, address, birthDate, sex, _id 
 
 const HomeScreen: React.FC = () => {
   const [data, setData] = useState<Patient[]>([]);
+  const { logout } = useAuth();
 
   useEffect(() => {
     fetch(`${API_URL}patients`)
@@ -78,6 +80,7 @@ const HomeScreen: React.FC = () => {
     <View style={{ flex: 1 }}>
       <View style={styles.header}>
         <Image source={require('@/assets/images/logo.png')} style={styles.logo} />
+        <Button title="Odhlásit se" onPress={logout} />
       </View>
       <View style={styles.container}>
         <FlatList
