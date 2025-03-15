@@ -1,37 +1,36 @@
 import { useState } from 'react';
 import { Audio } from 'expo-av';
-import { Image, StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Image, StyleSheet, Alert } from 'react-native';
 import Constants from 'expo-constants';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { API_URL, BACKGROUND_COLOR, CARD_COLOR, TEXT_COLOR, BLUE_COLOR, MAGENTA_COLOR } from '../constats';
+import { API_URL, BACKGROUND_COLOR, TEXT_COLOR } from '../constats';
 import * as Haptics from 'expo-haptics';
+import * as FileSystem from 'expo-file-system';
 
 export default function HomeScreen() {
-  const [recording, setRecording] = useState(null);
+  const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [isRecording, setIsRecording] = useState(false);
 
-  const haptic = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-  };
+  const haptic = () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
   const startRecording = async () => {
     try {
       const { granted } = await Audio.requestPermissionsAsync();
       if (!granted) {
-        alert('Aplikace potřebuje přístup k mikrofonu!');
+        Alert.alert('Přístup k mikrofonu je nutný!');
         return;
       }
+
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
       });
-      const { recording } = await Audio.Recording.createAsync(
-        Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
-      );
+
+      const { recording } = await Audio.Recording.createAsync(Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY);
       setRecording(recording);
       setIsRecording(true);
     } catch (error) {
-      console.error('Failed to start recording:', error);
+      console.error('Chyba při nahrávání:', error);
     }
   };
 
@@ -40,37 +39,31 @@ export default function HomeScreen() {
     setIsRecording(false);
     await recording.stopAndUnloadAsync();
     const uri = recording.getURI();
-    console.log('Recording saved at', uri);
-    uploadAudio(uri);
+    if (uri) {
+      await uploadAudio(uri);
+    }
     setRecording(null);
   };
 
-  const uploadAudio = async (uri) => {
-    const formData = new FormData();
-    formData.append('audio', {
-      uri,
-      type: 'audio/m4a',
-      name: 'recording.m4a',
-    });
-
+  const uploadAudio = async (uri: string) => {
     try {
-      const response = await fetch(API_URL + "recordings", {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      const result = await response.json();
-      console.log('Upload success:', result);
-    } catch (error) {
-      console.error('Upload failed:', error);
-    }
-  };
+      const base64Audio = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 });
 
-  const handlePress = () => {
-    haptic();
-    isRecording ? stopRecording() : startRecording();
+      const response = await fetch(`${API_URL}recordings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          data: base64Audio,
+          patientId: '12345', // Tady může být dynamická hodnota
+          fileType: 'm4a',
+        }),
+      });
+
+      const result = await response.json();
+      console.log('Nahrávání úspěšné:', result);
+    } catch (error) {
+      console.error('Nahrávání selhalo:', error);
+    }
   };
 
   return (
@@ -78,17 +71,13 @@ export default function HomeScreen() {
       <Image source={require('@/assets/images/logo.png')} style={styles.logo} />
       <Text style={styles.name}>Alena Malá, 69</Text>
       <Text style={styles.location}>Plzeň Americká, pod mostem 5</Text>
-      <TouchableOpacity
-        style={styles.recordButton}
-        onPress={handlePress}  // Zavolání handlePress, která přidá haptickou zpětnou vazbu
-      >
-        <MaterialCommunityIcons
-          name={isRecording ? 'microphone-off' : 'microphone'}
-          size={48}
-          color='#0D1218'
-        />
+      <TouchableOpacity style={styles.recordButton} onPress={() => {
+        haptic();
+        isRecording ? stopRecording() : startRecording();
+      }}>
+        <MaterialCommunityIcons name={isRecording ? 'microphone-off' : 'microphone'} size={48} color='#0D1218' />
       </TouchableOpacity>
-      <Text style={styles.recordText}>{isRecording ? 'nahrává se...' : 'začít nahrávat'}</Text>
+      <Text style={styles.recordText}>{isRecording ? 'Nahrává se...' : 'Začít nahrávat'}</Text>
     </View>
   );
 }
@@ -120,7 +109,7 @@ const styles = StyleSheet.create({
     backgroundColor: TEXT_COLOR,
     width: 96,
     height: 96,
-    borderRadius: "100%",
+    borderRadius: 48,
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -43,6 +43,7 @@ export default function HomeScreen() {
           data={DATA}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => <CardItem {...item} />}
+          showsVerticalScrollIndicator={false}
         />
       </View>
     </View>
@@ -67,6 +68,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     backgroundColor: BACKGROUND_COLOR,
     borderWidth: 2,
+    fontFamily: 'Outfit',
   },
   femaleBorder: {
     borderColor: MAGENTA_COLOR,
@@ -77,6 +79,7 @@ const styles = StyleSheet.create({
   cardContent: {
     flexDirection: 'row',
     alignItems: 'center',
+    fontFamily: 'Outfit',
   },
   icon: {
     marginRight: 16,
@@ -85,10 +88,12 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: 'white',
+    fontFamily: 'Outfit',
   },
   location: {
     fontSize: 14,
     color: 'white',
+    fontFamily: 'Outfit',
   },
   logo: {
     height: 48,
