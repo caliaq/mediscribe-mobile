@@ -1,44 +1,47 @@
-import { Tabs } from 'expo-router';
+import { Stack } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
 
-import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
-export default function TabLayout() {
+export default function StackLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <Tabs
+    <Stack
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
+        headerShown: false,  // Skrytí hlavičky na všech obrazovkách
+        headerTintColor: Colors[colorScheme ?? 'light'].tint,
+        headerStyle: Platform.select({
           ios: {
-            position: 'absolute',
+            // Customize for iOS if needed
           },
           default: {},
         }),
       }}>
-      <Tabs.Screen
+      <Stack.Screen
         name="index"
+        
         options={{
           title: 'home',
-          tabBarIcon: ({ color }) => <IconSymbol size={32} name="house.fill" color={color} />,
+          headerTitleAlign: 'center',
+          headerLeft: () => (
+            <IconSymbol size={32} name="house.fill" color={Colors[colorScheme ?? 'light'].tint} />
+          ),
         }}
       />
-      <Tabs.Screen
-        name="recording"
+      <Stack.Screen
+        name="recording/[id]"
         options={{
           title: 'recording',
-          tabBarIcon: ({ color }) => <IconSymbol size={32} name="paperplane.fill" color={color} />,
+          headerTitleAlign: 'center',
+          headerLeft: () => (
+            <IconSymbol size={32} name="paperplane.fill" color={Colors[colorScheme ?? 'light'].tint} />
+          ),
         }}
       />
-    </Tabs>
+    </Stack>
   );
 }

@@ -2,7 +2,8 @@ import { Image, StyleSheet, View, FlatList, Text } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { Card } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { API_URL, BACKGROUND_COLOR, CARD_COLOR, TEXT_COLOR, BLUE_COLOR, MAGENTA_COLOR } from '../constats';
+import { API_URL, BACKGROUND_COLOR, BLUE_COLOR, MAGENTA_COLOR } from '../constats';
+import { Link } from 'expo-router';
 
 // Define TypeScript interfaces for data
 interface Address {
@@ -29,15 +30,17 @@ interface CardItemProps {
   address: Address;
   birthDate: string;
   sex: 'M' | 'F';
+  _id: string;
 }
 
-const CardItem: React.FC<CardItemProps> = ({ name, address, birthDate, sex }) => {
+const CardItem: React.FC<CardItemProps> = ({ name, address, birthDate, sex, _id }) => {
   const fullName = `${name.first} ${name.last}`;
   const age = new Date().getFullYear() - new Date(birthDate).getFullYear();
   const location = `${address.street} ${address.city}, ${address.zip}`;
 
   return (
     <Card style={[styles.card, sex === 'F' ? styles.femaleBorder : styles.maleBorder]}>
+      <Link href = {{pathname: '/recording/[id]', params: { id: _id }}}>
       <Card.Content style={styles.cardContent}>
         <MaterialCommunityIcons
           name={sex === 'F' ? 'human-female' : 'human-male'}
@@ -50,6 +53,7 @@ const CardItem: React.FC<CardItemProps> = ({ name, address, birthDate, sex }) =>
           <Text style={styles.location}>{location}</Text>
         </View>
       </Card.Content>
+      </Link>
     </Card>
   );
 };

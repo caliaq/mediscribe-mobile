@@ -3,16 +3,36 @@ import { Audio } from 'expo-av';
 import { View, Text, TouchableOpacity, Image, StyleSheet, Alert } from 'react-native';
 import Constants from 'expo-constants';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { API_URL, BACKGROUND_COLOR, TEXT_COLOR } from '../constats';
+import { API_URL, BACKGROUND_COLOR, TEXT_COLOR } from '../../constats'; // Opravený import
 import * as Haptics from 'expo-haptics';
 import * as FileSystem from 'expo-file-system';
+import { useLocalSearchParams } from 'expo-router';
 
 export default function HomeScreen() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const [patient, setPatient] = useState<any>(null);
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingUri, setRecordingUri] = useState<string | null>(null);
 
   const haptic = () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+  useEffect(() => {
+    if (id) {
+      console.log('Fetching patient data for ID:', id); // Debugging
+      fetch(`${API_URL}patients/${id}`)
+        .then((response) => response.json())
+        .then((data) => {
+          console.log('Patient data received:', data); // Debugging
+          if (data.data) {
+            setPatient(data.data);
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching patient data:", error);
+        });
+    }
+  }, [id]);
 
   const startRecording = async () => {
     if (recordingUri) return;
@@ -70,31 +90,62 @@ export default function HomeScreen() {
     }
   };
 
+  interface IPatient {
+    _id: string;
+    name: {
+      first: string;
+      last: string;
+    };
+    address: {
+      street: string;
+      city: string;
+      zip: string;
+    };
+    birthDate: string;
+    sex: 'M' | 'F';
+  }
+
+  const Patient: React.FC<IPatient> = ({ name, address, birthDate, sex, _id }) => {
+    const fullName = `${name.first} ${name.last}`;
+    const age = new Date().getFullYear() - new Date(birthDate).getFullYear();
+    const location = `${address.street} ${address.city}, ${address.zip}`;
+
+    return (
+      <View style={styles.container}>
+        <Image source={require('@/assets/images/logo.png')} style={styles.logo} />
+        <Text style={styles.name}>{fullName}, {age}</Text>
+        <Text style={styles.location}>{location}</Text>
+        <TouchableOpacity
+          style={[styles.recordButton, recordingUri && styles.disabledButton]}
+          onPress={() => {
+            haptic();
+            isRecording ? stopRecording() : startRecording();
+          }}
+          disabled={!!recordingUri}
+        >
+          <MaterialCommunityIcons name={isRecording ? 'microphone-off' : 'microphone'} size={48} color='#0D1218' />
+        </TouchableOpacity>
+        <Text style={styles.recordText}>{recordingUri ? 'Chcete odeslat??' : isRecording ? 'Nahrává se...' : 'Začít nahrávat'}</Text>
+        {recordingUri && (
+          <View style={styles.actionsContainer}>
+            <TouchableOpacity style={styles.actionButton} onPress={() => setRecordingUri(null)}>
+              <MaterialCommunityIcons name='close' size={40} color='red' />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.actionButton} onPress={uploadAudio}>
+              <MaterialCommunityIcons name='check' size={40} color='green' />
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+    );
+  };
+
   return (
     <View style={styles.container}>
-      <Image source={require('@/assets/images/logo.png')} style={styles.logo} />
-      <Text style={styles.name}>Alena Malá, 69</Text>
-      <Text style={styles.location}>Plzeň Americká, pod mostem 5</Text>
-      <TouchableOpacity 
-        style={[styles.recordButton, recordingUri && styles.disabledButton]} 
-        onPress={() => {
-          haptic();
-          isRecording ? stopRecording() : startRecording();
-        }}
-        disabled={!!recordingUri}
-      >
-        <MaterialCommunityIcons name={isRecording ? 'microphone-off' : 'microphone'} size={48} color='#0D1218' />
-      </TouchableOpacity>
-      <Text style={styles.recordText}>{recordingUri ? 'Chcete odeslat??' : isRecording ? 'Nahrává se...' : 'Začít nahrávat'}</Text>
-      {recordingUri && (
-        <View style={styles.actionsContainer}>
-          <TouchableOpacity style={styles.actionButton} onPress={() => setRecordingUri(null)}>
-            <MaterialCommunityIcons name='close' size={40} color='red' />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.actionButton} onPress={uploadAudio}>
-            <MaterialCommunityIcons name='check' size={40} color='green' />
-          </TouchableOpacity>
-        </View>
+      {patient ? (
+        <Patient {...patient} />
+      ) : (
+        <Text style={styles.recordText}>Načítání pacienta...</Text>
       )}
     </View>
   );
