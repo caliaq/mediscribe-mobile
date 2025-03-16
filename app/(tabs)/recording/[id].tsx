@@ -142,7 +142,7 @@ export default function HomeScreen() {
           <MaterialCommunityIcons name={isRecording ? 'microphone-off' : 'microphone'} size={48} color='#0D1218' />
         </TouchableOpacity>
         <Text style={styles.recordText}>
-          {recordingUri ? 'Chcete odeslat?' : isRecording ? 'Nahrává se...' : 'Začít nahrávat'}
+          {recordingUri ? 'chcete odeslat?' : isRecording ? 'nahrává se...' : 'začít nahrávat'}
         </Text>
         {recordingUri && (
           <View style={styles.actionsContainer}>

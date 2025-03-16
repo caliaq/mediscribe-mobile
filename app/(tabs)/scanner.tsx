@@ -5,6 +5,7 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import { API_URL, BACKGROUND_COLOR, TEXT_COLOR } from '../constats';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
+import { router } from 'expo-router'; // Add this import
 
 function QRScannerScreen() {
     const [scanned, setScanned] = useState(false);
@@ -29,12 +30,18 @@ function QRScannerScreen() {
         if (data) {
             setScanned(true);
             setResult(data);
-            const token = await AsyncStorage.getItem('authToken');
-            await fetch(API_URL + "auth?sessionId=" + data, {
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                },
-            });
+            try {
+                const token = await AsyncStorage.getItem('authToken');
+                await fetch(API_URL + "auth?sessionId=" + data, {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    },
+                });
+                // Redirect to index page after successful scan
+                router.replace('/(tabs)');
+            } catch (error) {
+                console.error('Error during QR scan:', error);
+            }
         }
     };
 
@@ -48,14 +55,7 @@ function QRScannerScreen() {
                     onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
                     style={StyleSheet.absoluteFillObject}
                 />
-                {scanned && (
-                    <Button
-                        title={'Skenovat znovu'}
-                        onPress={() => setScanned(false)}
-                    />
-                )}
             </View>
-            <View style={styles.textbox}>{result && <ThemedText style={styles.resulttext}>{result}</ThemedText>}</View>
         </ThemedView>
     );
 }

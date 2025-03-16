@@ -88,13 +88,16 @@ const HomeScreen: React.FC = () => {
         <Image source={require('@/assets/images/logo.png')} style={styles.logo} />
         <View style={styles.headerButtons}>
           <MaterialIcons 
-            name="qr-code-scanner" 
-            size={24} 
-            color="white" 
-            style={styles.scannerIcon}
-            onPress={() => router.push('/scanner')}
+        name="qr-code-scanner" 
+        size={24} 
+        color="white" 
+        style={styles.scannerIcon}
+        onPress={() => router.push('/scanner')}
           />
-          <Button title="Odhlásit se" onPress={logout} />
+          <Button 
+        title="odhlásit se" 
+        onPress={logout} 
+          />
         </View>
       </View>
       <View style={styles.container}>

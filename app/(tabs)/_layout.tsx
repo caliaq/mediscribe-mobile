@@ -37,14 +37,14 @@ export default function TabsLayout() {
       <Stack.Screen
         name="scanner"
         options={{
-          title: 'Scanner',
+          title: 'skenování QR kódu',
           headerTitleAlign: 'center',
         }}
       />
       <Stack.Screen
         name="recording/[id]"
         options={{
-          title: 'Detaily',
+          title: 'nahrávání',
           headerTitleAlign: 'center',
           headerLeft: () => (
             <Pressable 
