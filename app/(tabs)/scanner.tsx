@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Text, View, StyleSheet, Button } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import { BACKGROUND_COLOR, TEXT_COLOR } from '../constats';
+import { API_URL, BACKGROUND_COLOR, TEXT_COLOR } from '../constats';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 
@@ -24,21 +25,16 @@ function QRScannerScreen() {
             </ThemedView>
         );
     }
-
-    const handleBarCodeScanned = ({ data }: { data: string }) => {
+    const handleBarCodeScanned = async ({ data }: { data: string }) => {
         if (data) {
             setScanned(true);
             setResult(data);
-        }
-    };
-
-    const handleResult = () => {
-        if (!result) return null;
-
-        if (result.startsWith('http')) {
-            return <ThemedText type="link">{result}</ThemedText>;
-        } else {
-            return <ThemedText style={styles.resulttext}>{result}</ThemedText>;
+            const token = await AsyncStorage.getItem('authToken');
+            await fetch(API_URL + "auth?sessionId=" + data, {
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+            });
         }
     };
 
@@ -53,13 +49,13 @@ function QRScannerScreen() {
                     style={StyleSheet.absoluteFillObject}
                 />
                 {scanned && (
-                    <Button 
-                        title={'Skenovat znovu'} 
+                    <Button
+                        title={'Skenovat znovu'}
                         onPress={() => setScanned(false)}
                     />
                 )}
             </View>
-            <View style={styles.textbox}>{handleResult()}</View>
+            <View style={styles.textbox}>{result && <ThemedText style={styles.resulttext}>{result}</ThemedText>}</View>
         </ThemedView>
     );
 }

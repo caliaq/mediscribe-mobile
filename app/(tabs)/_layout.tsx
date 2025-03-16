@@ -1,24 +1,20 @@
-import { Stack, Redirect } from 'expo-router';
-import React from 'react';
+import { Stack, Redirect, useRouter } from 'expo-router';
 import { Platform, Pressable } from 'react-native';
-import { Ionicons } from 'react-native-vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useAuth } from '@/context/AuthContext';
-import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { useRouter } from 'expo-router';
 
-export default function StackLayout() {
+export default function TabsLayout() {
   const colorScheme = useColorScheme();
   const { isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
 
-  // Pokud se ověřuje autentizace, můžeme zobrazit loading stav
   if (isLoading) {
     return null;
   }
 
-  // Pokud uživatel není přihlášen, přesměrujeme na login
   if (!isAuthenticated) {
     return <Redirect href="/login" />;
   }
@@ -39,36 +35,49 @@ export default function StackLayout() {
         }}
       />
       <Stack.Screen
+        name="scanner"
+        options={{
+          title: 'Scanner',
+          headerTitleAlign: 'center',
+        }}
+      />
+      <Stack.Screen
         name="recording/[id]"
-        options={({ navigation }) => {
-          const router = useRouter();
-          return {
-            title: 'Detaily',
-            headerTitleAlign: 'center',
-            headerLeft: () => (
+        options={{
+          title: 'Detaily',
+          headerTitleAlign: 'center',
+          headerLeft: () => (
+            <Pressable 
+              onPress={() => router.back()}
+              style={({ pressed }) => ({
+                opacity: pressed ? 0.5 : 1,
+                paddingLeft: 15
+              })}
+            >
               <Ionicons 
-                name="arrow-back"
+                name="arrow-back" 
                 size={24} 
                 color={Colors[colorScheme ?? 'light'].tint}
-                onPress={() => navigation.goBack()} 
-                style={{ paddingLeft: 10 }}
               />
-            ),
-            headerRight: () => (
-              <Pressable 
-                onPress={() => router.push('/scanner')}
-                style={({ pressed }) => ({
-                  opacity: pressed ? 0.5 : 1,
-                  marginRight: 15
-                })}
-              >
-                <MaterialIcons name="qr-code-scanner" size={24} color="black" />
-              </Pressable>
-            )
-          };
-        }} 
+            </Pressable>
+          ),
+          headerRight: () => (
+            <Pressable 
+              onPress={() => router.push('/scanner')}
+              style={({ pressed }) => ({
+                opacity: pressed ? 0.5 : 1,
+                paddingRight: 15
+              })}
+            >
+              <MaterialIcons 
+                name="qr-code-scanner" 
+                size={24} 
+                color={Colors[colorScheme ?? 'light'].tint}
+              />
+            </Pressable>
+          )
+        }}
       />
     </Stack>
-
   );
 }
