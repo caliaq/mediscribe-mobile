@@ -131,6 +131,7 @@ export default function HomeScreen() {
         <Image source={require('@/assets/images/logo.png')} style={styles.logo} />
         <Text style={styles.name}>{fullName}, {age}</Text>
         <Text style={styles.location}>{location}</Text>
+        
         <TouchableOpacity
           style={[styles.recordButton, recordingUri && styles.disabledButton]}
           onPress={() => {
